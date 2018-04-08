@@ -1,0 +1,20 @@
+$montserrat: "Montserrat Alternates", sans-serif;
+$font-color: rgba(164, 201, 177, 1);
+$background-color: rgba(4, 72, 55, 1);
+
+* {
+  margin: 0;
+  padding: 0;
+  font-family: $montserrat;
+}
+
+body,
+html {
+  width: 100vw;
+  height: 100vw;
+}
+
+.app {
+  width: 100%;
+  height: 100%;
+}

@@ -1,0 +1,74 @@
+@import url("https://fonts.googleapis.com/css?family=Montserrat+Alternates");
+@import url("https://fonts.googleapis.com/css?family=Montserrat");
+
+$background-color: rgba(4, 72, 55, 1);
+$font-color: rgba(164, 201, 177, 1);
+$slightly-tinted: rgb(112, 141, 122);
+$glow-color: rgba(60, 179, 113, 0.6);
+$montserratBig: "Montserrat", serif;
+$montserrat: "Montserrat Alternates", sans-serif;
+
+.header {
+  background: $background-color;
+  color: $font-color;
+  width: 100%;
+  height: 80px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  h1 {
+    font-family: $montserratBig;
+    font-weight: 700;
+    position: absolute;
+    left: 20px;
+  }
+
+  .loginButton {
+    padding: 10px 8px 10px 8px;
+    background: $font-color;
+    color: $background-color;
+    box-shadow: 0 0 20px $glow-color;
+    border: 1px hidden;
+    border-radius: 10px;
+    margin-right: 10px;
+    font-weight: 800;
+    font-size: 1.2em;
+    transition: all 0.4s;
+
+    &:hover {
+      box-shadow: 0 0 40px $glow-color;
+      background: $slightly-tinted;
+      padding: 9px 7px 9px 7px;
+      margin: 0 11px 1px 1px;
+    }
+
+    &:active,
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .hamburger {
+    padding: 5px 8px 5px 8px;
+    background: $font-color;
+    color: $background-color;
+    box-shadow: 0 0 20px $glow-color;
+    border: 1px hidden;
+    border-radius: 20%;
+    margin-right: 10px;
+    font-weight: 800;
+    font-size: 1.2em;
+    transition: all 0.4s;
+
+    &:hover {
+      box-shadow: 0 0 40px $glow-color;
+      background: $slightly-tinted;
+    }
+
+    &:active,
+    &:focus {
+      outline: none;
+    }
+  }
+}
