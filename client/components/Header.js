@@ -1,14 +1,18 @@
 import React, { Component } from "React";
-import styled from "styled-components";
 import "../assets/styles/Header.scss";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import { loginAction, logoutAction } from "../store/actions";
+import { withRouter } from "react-router-dom";
 
 class Header extends Component {
   constructor(props) {
     super(props);
     this.handleLogout = this.handleLogout.bind(this);
+    this.toggleMenu = this.toggleMenu.bind(this);
+    this.state = {
+      menuIsOpen: false
+    };
   }
 
   componentWillMount() {
@@ -46,35 +50,36 @@ class Header extends Component {
       const json = await response.json();
       if (json.message) {
         this.props.logoutAction();
+      } else {
+        this.props.logoutAction();
+        throw "No success message was received from the server";
       }
     } catch (err) {
-      console.log(err);
+      alert("Error logging out", err);
     }
+  }
+
+  navTo(url) {
+    this.setState({ menuIsOpen: false });
+    return this.props.history.push(`/${url}`);
+  }
+
+  toggleMenu() {
+    const trigger = !this.state.menuIsOpen;
+    return this.setState({ menuIsOpen: trigger });
   }
 
   render() {
     const userName = this.props.user.displayName || "Stranger";
     return (
       <div className="header">
-        <h1>Howdy {userName}!</h1>
+        <h2>Howdy, {userName}!</h2>
         {this.props.isAuthenticated ? (
           <span>
-            <button className="hamburger">
-              <img
-                src="https://cdn0.iconfinder.com/data/icons/social-messaging-productivity-4/128/menu-2-512.png"
-                height="25px"
-                width="28px"
-                style={{ marginTop: "5px" }}
-              />
+            <button onClick={this.toggleMenu} className="hamburger">
+              <img src="https://cdn0.iconfinder.com/data/icons/social-messaging-productivity-4/128/menu-2-512.png" />
             </button>
-            <button
-              onClick={this.handleLogout}
-              className="loginButton"
-              style={{
-                position: "relative",
-                top: "-5px"
-              }}
-            >
+            <button onClick={this.handleLogout} className="loginButton">
               Logout
             </button>
           </span>
@@ -85,6 +90,15 @@ class Header extends Component {
             </button>
           </form>
         )}
+        {this.state.menuIsOpen ? (
+          <div className="navMenu">
+            <button onClick={this.navTo.bind(this, "ejuices")}>E-Juices</button>
+            <button>Two</button>
+            <button>Three</button>
+            <button>Four</button>
+            <button>Five</button>
+          </div>
+        ) : null}
       </div>
     );
   }
@@ -103,4 +117,4 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Header);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Header));

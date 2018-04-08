@@ -45,12 +45,35 @@ const start = async () => {
   const client = await MongoClient.connect(url);
   const db = await client.db(dbName);
   const Users = await db.collection("users");
+  const Flavors = await db.collection("flavors");
+  const Mixes = await db.collection("mixes");
 
-  /*
+  const prepare = o => {
+    if (!o) return null;
+    o._id = o._id.toString();
+    return o;
+  };
 
   const resolvers = {
-    Query: {},
-    Mutation: {}
+    Query: {
+      flavor: async (root, { _id }) =>
+        prepare(await Flavors.findOne(ObjectId(_id))),
+      flavorByName: async (root, { name }) =>
+        prepare(await Flavors.findOne({ name: name })),
+      mix: async (root, { _id }) => prepare(await Mixes.findOne(ObjectId(_id))),
+      mixByName: async (root, { name }) =>
+        prepare(await Mixes.findOne({ name: name }))
+    },
+    Mutation: {
+      addFlavor: async (root, args) => {
+        const res = await Flavors.insert({ ...args });
+        return prepare(await Flavors.findOne({ _id: res.insertedIds[0] }));
+      },
+      addMix: async (root, args) => {
+        const res = await Mixes.insert({ ...args });
+        return prepare(await Mixes.findOne({ _id: res.insertedIds[0] }));
+      }
+    }
   };
 
   const schema = makeExecutableSchema({
@@ -58,10 +81,8 @@ const start = async () => {
     resolvers
   });
 
-  app.use("/graphql", express.json(), graphqlExpress({ schema }));
+  app.use("/graphql", graphqlExpress({ schema }));
   app.use("/graphiql", graphiqlExpress({ endpointURL: "/graphql" }));
-
-  */
 
   passport.use(
     new GoogleStrategy(
