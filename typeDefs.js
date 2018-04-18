@@ -5,6 +5,7 @@ const typeDefs = [
     flavorByName(name: String): Flavor
     mix(_id: String): Mix
     mixByName(name: String): Mix
+    allFlavors: [Flavor]
   }
 
   type Flavor {

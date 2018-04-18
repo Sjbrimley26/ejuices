@@ -1,0 +1,28 @@
+.bottlePic {
+   z-index: 3;
+}
+
+.bottleBlock {
+    position: absolute;
+    height: 200px;
+    width: 200px;
+    margin-top: 20px;
+    margin-left: 20px;
+    z-index: 0;
+}
+
+.pgFill {
+    background: rgb(62, 101, 228);
+    z-index: -1;
+    position: absolute;
+    width: 100%;
+    transition: all 0.4s;
+}
+
+.vgFill {
+    background: rgb(245, 32, 78);
+    z-index: -1;
+    position: absolute;
+    width: 100%;
+    transition: all 0.4s;
+}

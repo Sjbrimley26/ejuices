@@ -30,6 +30,12 @@
     "passport-google-oauth20": "^1.0.0"
   },
   "nodemonConfig": {
-    "ignore": ["client/*"]
+    "ignore": [
+      "client/*"
+    ]
+  },
+  "devDependencies": {
+    "img-loader": "^2.0.1",
+    "url-loader": "^1.0.1"
   }
 }

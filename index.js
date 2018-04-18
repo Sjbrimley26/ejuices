@@ -60,6 +60,14 @@ const start = async () => {
         prepare(await Flavors.findOne(ObjectId(_id))),
       flavorByName: async (root, { name }) =>
         prepare(await Flavors.findOne({ name: name })),
+      allFlavors: async (root) => {
+        let flavorArr = [];
+        const cursor = Flavors.find();
+        for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
+          flavorArr.push(doc);
+        }
+        return flavorArr;
+      },
       mix: async (root, { _id }) => prepare(await Mixes.findOne(ObjectId(_id))),
       mixByName: async (root, { name }) =>
         prepare(await Mixes.findOne({ name: name }))

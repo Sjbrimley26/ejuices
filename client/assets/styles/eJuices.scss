@@ -1,0 +1,25 @@
+$background-color: rgb(196, 243, 212);
+$font-color: rgb(2, 44, 34);
+
+.midBox {
+   height: 800px;
+   width: 100%;
+   background: $background-color;
+   color: $font-color;
+   display: flex;
+}
+
+.halfBox {
+    width: 50%;
+    display: inline-block;
+    height: 100%;
+}
+
+.halfBox--column {
+    display: inline-flex;
+    flex-direction: column;
+
+    button {
+        width: 50%;
+    }
+}
