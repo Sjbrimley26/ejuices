@@ -1,4 +1,4 @@
-import React, { Component } from "React";
+import React, { Component } from "react";
 import "../assets/styles/Header.scss";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
@@ -61,7 +61,7 @@ class Header extends Component {
 
   navTo(url) {
     this.setState({ menuIsOpen: false });
-    return this.props.history.push(`/${url}`);
+    return this.props.history.push(`${url}`);
   }
 
   toggleMenu() {
@@ -92,8 +92,8 @@ class Header extends Component {
         )}
         {this.state.menuIsOpen ? (
           <div className="navMenu">
-            <button onClick={this.navTo.bind(this, "ejuices")}>E-Juices</button>
-            <button>Two</button>
+            <button onClick={this.navTo.bind(this, "/")}>Home</button>
+            <button onClick={this.navTo.bind(this, "/ejuices")}>Recipe Maker</button>
             <button>Three</button>
             <button>Four</button>
             <button>Five</button>
