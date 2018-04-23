@@ -7,10 +7,28 @@ $font-color: rgb(2, 44, 34);
    background: $background-color;
    color: $font-color;
    display: flex;
+
+   button {
+       background: $font-color;
+       color: $background-color;
+       padding: 8px 0 8px 0;
+       border-radius: 12px;
+       border: 1px hidden;
+       box-shadow: 0 0 20px rgb(224,55,146);
+       transition: all 0.4s;
+       margin: 10px;
+
+       &:hover {
+           color: $font-color;
+           background: $background-color;
+           box-shadow: 0 0 40px red;
+       }
+   }
 }
 
 .halfBox {
     width: 50%;
+    min-width: 270px;
     display: inline-block;
     height: 100%;
 }

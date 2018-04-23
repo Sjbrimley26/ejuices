@@ -7,7 +7,19 @@ import "../assets/styles/eJuices.scss";
 import "../assets/styles/Bottle.scss";
 import Popup from "reactjs-popup";
 
-const handleResponse = response => {
+const findPG = element => {
+  return element.flavor === "PG";
+};
+
+const findVG = element => {
+  return element.flavor === "VG";
+}
+
+const findFlavorName = name => element => {
+  return element.flavor === name;
+}
+
+const handleJSONResponse = response => {
   return response.json().then(json => {
     if (response.ok) {
       return json;
@@ -28,14 +40,26 @@ class EJuices extends Component {
     this.getFlavors = this.getFlavors.bind(this);
     this.changePG = this.changePG.bind(this);
     this.changeVG = this.changeVG.bind(this);
+    this.handleSelectedFlavorChange = this.handleSelectedFlavorChange.bind(this);
+    this.handlePercentChange = this.handlePercentChange.bind(this);
+    this.handlePGChange = this.handlePGChange.bind(this);
+    this.handleVGChange = this.handleVGChange.bind(this);
+    this.addFillers = this.addFillers.bind(this);
     this.state = {
       currentlySelected: "",
+      currentPercentage: 0,
+      currentPG: 0,
+      currentVG: 0,
       bottleFlavors: [],
       flavors: [],
-      pgHeight: 5,
-      vgHeight: 3,
-      pgTop: 190,
-      vgTop: 187
+      flavorPopUpOpen: false,
+      addFillerPopup: false,
+      pgHeight: 0,
+      vgHeight: 0,
+      flavorHeight: 0,
+      flavorTop: 200,
+      pgTop: 200,
+      vgTop: 200
     };
   }
 
@@ -69,18 +93,39 @@ class EJuices extends Component {
         "content-type": "application/json"
       }
     })
-    .then(handleResponse)
-    .then(flavor => {
-      console.log(flavor.data.addFlavorToDB);
-    })
-    .catch(err => {
-      return alert("Could not add flavor!", err);
-    });
+      .then(handleJSONResponse)
+      .then(flavor => {
+        console.log(flavor.data.addFlavorToDB);
+      })
+      .catch(err => {
+        return alert("Could not add flavor!", err);
+      });
   }
 
   selectFlavor(flavor) {
+    let { bottleFlavors } = this.state;
+    this.changeFlavorAmount(this.state.currentPercentage);
+    let foundIndex = bottleFlavors.findIndex(findFlavorName(this.state.currentlySelected));
+    if (foundIndex > -1) {
+      const oldPercentage = bottleFlavors[foundIndex].percentage;
+      bottleFlavors.splice(bottleFlavors.findIndex(findFlavorName(this.state.currentlySelected)),
+      1,
+      {
+        flavor: this.state.currentlySelected,
+        percentage: this.state.currentPercentage + oldPercentage
+      }
+       );
+    } else if (this.state.currentPercentage > 0) {
+      bottleFlavors = bottleFlavors.concat({
+        flavor: this.state.currentlySelected,
+        percentage: this.state.currentPercentage
+      });
+    }
     return this.setState({
-      bottleFlavors: this.state.bottleFlavors.concat(flavor)
+      bottleFlavors: bottleFlavors,
+      currentlySelected: "",
+      flavorPopUpOpen: false,
+      currentPercentage: 0,
     });
   }
 
@@ -100,63 +145,228 @@ class EJuices extends Component {
       headers: {
         "content-type": "application/json"
       }
-    })
-    .then(response => {
+    }).then(response => {
       response.json().then(json => {
         this.setState({ flavors: json.data.allFlavors });
       });
     });
-  
   }
 
-  changePG (percentage) {
-    /*
-    pg -> height + top = 195;
-when height increases, top decreases by same amount
-top = 195 - height
-for every %, increase height by 2
+  //TODO FIX Bug that causes vg to overlap pg if you add them 
+  // both at once.
 
-vg -> height + top = pg top
-same rules
-*/
+  changePG(percentage) {
     return this.setState({
-      pgHeight: this.state.pgHeight + (2 * percentage),
-      pgTop: this.state.pgTop - (2 * percentage),
-      vgTop: this.state.vgTop - (2 * percentage)
+      pgHeight: this.state.pgHeight + 2 * percentage,
+      pgTop: this.state.pgTop - 2 * percentage,
+      flavorTop: this.state.flavorTop + 2 * percentage,
+      vgTop: this.state.vgTop + 2 * percentage
     });
-
   }
 
-  changeVG (percentage) {
+  changeFlavorAmount(percentage) {
     return this.setState({
-      vgHeight: this.state.vgHeight + (2 * percentage),
-      vgTop: this.state.vgTop - (2 * percentage)
+      flavorHeight: this.state.flavorHeight + 2 * percentage,
+      vgTop: this.state.vgTop - 2 * percentage,
+      flavorTop: this.state.flavorTop - 2 * percentage
     });
+  }
+
+  changeVG(percentage) {
+    return this.setState({
+      vgHeight: this.state.vgHeight + 2 * percentage,
+      vgTop:
+        this.state.flavorTop -
+        (this.state.vgHeight + 2 * percentage)
+    });
+  }
+
+  *changePGThenVG(i, t) {
+    yield this.changePG(i);
+    yield this.changeVG(t);
+  }
+
+  handleSelectedFlavorChange(e) {
+    this.setState({
+      currentlySelected: e.target.value
+    });
+  }
+
+  handlePercentChange(e) {
+    const numReg = /\d{1,2}/;
+    if (numReg.test(e.target.value)) {
+      const num = parseInt(e.target.value);
+      const { flavorHeight, pgHeight, vgHeight } = this.state;
+      if ((num * 2) + flavorHeight + pgHeight + vgHeight <= 200) {
+        this.setState({ currentPercentage:  num });
+      }
+      else {
+        alert("Bottle is too full to add that much!");
+      }
+    }
+  }
+
+  handleVGChange(e) {
+    const numReg = /\d{1,2}/;
+    if (numReg.test(e.target.value)) {
+      const num = parseInt(e.target.value);
+      const { flavorHeight, pgHeight, vgHeight } = this.state;
+      if ((num * 2) + flavorHeight + pgHeight + vgHeight <= 200) {
+        this.setState({ currentVG:  num });
+      }
+      else {
+        alert("Bottle is too full to add that much!");
+      }
+    }
+  }
+
+  handlePGChange(e) {
+    const numReg = /\d{1,2}/;
+    if (numReg.test(e.target.value)) {
+      const num = parseInt(e.target.value);
+      const { flavorHeight, pgHeight, vgHeight } = this.state;
+      if ((num * 2) + flavorHeight + pgHeight + vgHeight <= 200) {
+        this.setState({ currentPG:  num });
+      }
+      else {
+        alert("Bottle is too full to add that much!");
+      }
+    }
+  }
+
+  addFillers(e) {
+    e.stopPropagation();
+    let { bottleFlavors } = this.state;
+    let iter = this.changePGThenVG(this.state.currentPG, this.state.currentVG);
+
+    if (this.state.currentPG >= 0) {
+      iter.next();
+      if (bottleFlavors.findIndex(findPG) > -1) {
+        const oldPercentage = bottleFlavors[bottleFlavors.findIndex(findPG)].percentage;
+        bottleFlavors.splice(bottleFlavors.findIndex(findPG), 1, {
+          flavor: "PG",
+          percentage: oldPercentage + this.state.currentPG
+        });
+      } else {
+        bottleFlavors = bottleFlavors.concat({
+          flavor: "PG",
+          percentage: this.state.currentPG
+        });
+      }
+    }
+
+    if (this.state.currentVG >= 0) {
+      iter.next();
+      if (bottleFlavors.findIndex(findVG) > -1) {
+        const oldPercentage = bottleFlavors[bottleFlavors.findIndex(findVG)].percentage;
+        bottleFlavors.splice(bottleFlavors.findIndex(findVG), 1, {
+          flavor: "VG",
+          percentage: oldPercentage + this.state.currentVG
+        });
+      } else {
+        bottleFlavors = bottleFlavors.concat({
+          flavor: "VG",
+          percentage: this.state.currentVG
+        });
+      }
+    }
+
+    this.setState({
+      bottleFlavors: bottleFlavors,
+      currentPG: 0,
+      currentVG: 0,
+      addFillerPopup: false
+    })
   }
 
   render() {
-    return <div className="midBox">
+    const { flavorHeight, vgHeight, pgHeight } = this.state;
+    const remainingPercentage = (200 - flavorHeight - pgHeight - vgHeight) / 2;
+    return <div className="midBox" onClick={() => {
+      this.setState({
+        flavorPopUpOpen: false,
+        addFillerPopup: false
+      })
+    }}>
         <div className="halfBox">
           <div className="bottleBlock">
-            <div className="pgFill" style={{height: this.state.pgHeight, top: this.state.pgTop}} />
-            <div className="vgFill" style={{height: this.state.vgHeight, top: this.state.vgTop}} />
+            <div className="pgFill" style={{ height: this.state.pgHeight, top: this.state.pgTop }} />
+            <div className="flavorFill" style={{ height: this.state.flavorHeight, top: this.state.flavorTop }} />
+            <div className="vgFill" style={{ height: this.state.vgHeight, top: this.state.vgTop }} />
             <img className="bottlePic" height="200px" width="200px" src={bottlePic} />
+          </div>
+          <br />
+          <div className="recipe">
+            {this.state.bottleFlavors ? this.state.bottleFlavors.map(
+                  (item, i) => {
+                    const flavorLength = item.flavor.length;
+                    const percentLength = item.percentage.toString().length;
+                    const itemString =
+                      item.flavor +
+                      " " +
+                      "-".repeat(22 - flavorLength / 0.8 - percentLength) +
+                      " " +
+                      item.percentage +
+                      " %";
+                    return <ul key={i}>{itemString}</ul>;
+                  }
+                ) : null}
           </div>
         </div>
         <div className="halfBox halfBox--column">
-          <label>Add a Flavor to the Bottle!</label>
-          <Popup trigger={<button>Pick Flavor</button>} modal>
-          <div>
-            <p>Name, Recommended Percentage</p>
-            {this.state.flavors.map((flavor, i) => {
-              return (
-                <div key={i}>
-                <input type="radio" name='flavorOption'/>
-                <label>{flavor.name} ({flavor.avg_percent}%)</label>
-                </div>
-              );
-            })}
-            <button onClick={this.selectFlavor}>Select!</button>
+          <br />
+          <label>Make a Recipe!</label>
+          <br />
+          <button onClick={(e) => {
+              e.stopPropagation();
+              this.setState({ flavorPopUpOpen: true });
+            }}>
+            {" "}
+            Add Flavors{" "}
+          </button>
+          <Popup open={this.state.flavorPopUpOpen} modal>
+            <div>
+              <p>Name, Recommended Percentage</p>
+              {this.state.flavors ? this.state.flavors.map((flavor, i) => {
+                    return <div key={i}>
+                        <input type="radio" name="flavorOption" value={flavor.name} onChange={this.handleSelectedFlavorChange} />
+                        <label>
+                          {flavor.name} ({flavor.avg_percent}%)
+                        </label>
+                      </div>;
+                  }) : null}
+
+              {this.state.currentlySelected ? <span>
+                  <label>Enter a percentage </label>
+                  <input type="text" onChange={this.handlePercentChange} value={this.state.currentPercentage} />
+                </span> : null}
+              <br />
+              <button onClick={this.selectFlavor}>Select!</button>
+              <br />
+              <span>{remainingPercentage}% of bottle left</span>
+            </div>
+          </Popup>
+
+          <br />
+          <button onClick={(e) => {
+              e.stopPropagation();
+              this.setState({ addFillerPopup: true });
+            }}>
+            Add PG / VG
+          </button>
+          <Popup open={this.state.addFillerPopup} modal>
+            <div>
+              <label>VG</label>
+              &nbsp;
+              <input type="text" onChange={this.handleVGChange} value={this.state.currentVG} />
+              <br />
+              <label>PG</label>
+              &nbsp;
+              <input type="text" onChange={this.handlePGChange} value={this.state.currentPG} />
+              <br />
+              <button onClick={this.addFillers}>Add to Bottle!</button>
+              <br />
+              <span>{remainingPercentage}% of bottle left</span>
             </div>
           </Popup>
         </div>

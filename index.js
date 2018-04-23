@@ -4,7 +4,7 @@ import express from "express";
 const dotenv = require("dotenv").config();
 import path from "path";
 import { MongoClient } from "mongodb";
-import typeDefs from "./typeDefs";
+import typeDefs from "./graphql/typeDefs";
 import { graphqlExpress, graphiqlExpress } from "graphql-server-express";
 import { makeExecutableSchema } from "graphql-tools";
 import passport from "passport";
@@ -41,18 +41,20 @@ passport.deserializeUser(function(obj, cb) {
   cb(null, obj);
 });
 
+const prepare = o => {
+  if (!o) return null;
+  o._id = o._id.toString();
+  return o;
+};
+
 const start = async () => {
   const client = await MongoClient.connect(url);
   const db = await client.db(dbName);
-  const Users = await db.collection("users");
-  const Flavors = await db.collection("flavors");
-  const Mixes = await db.collection("mixes");
-
-  const prepare = o => {
-    if (!o) return null;
-    o._id = o._id.toString();
-    return o;
-  };
+  const [ Users, Flavors, Mixes ] = await Promise.all([
+    db.collection("users"),
+    db.collection("flavors"),
+    db.collection("mixes")
+  ]);
 
   const resolvers = {
     Query: {
@@ -60,10 +62,14 @@ const start = async () => {
         prepare(await Flavors.findOne(ObjectId(_id))),
       flavorByName: async (root, { name }) =>
         prepare(await Flavors.findOne({ name: name })),
-      allFlavors: async (root) => {
+      allFlavors: async root => {
         let flavorArr = [];
         const cursor = Flavors.find();
-        for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
+        for (
+          let doc = await cursor.next();
+          doc != null;
+          doc = await cursor.next()
+        ) {
           flavorArr.push(doc);
         }
         return flavorArr;

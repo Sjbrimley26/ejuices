@@ -19,10 +19,30 @@
     transition: all 0.4s;
 }
 
+.flavorFill {
+    background: rgb(62, 162, 228);
+    z-index: -1;
+    position: absolute;
+    width: 100%;
+    transition: all 0.4s;
+}
+
 .vgFill {
     background: rgb(245, 32, 78);
     z-index: -1;
     position: absolute;
     width: 100%;
     transition: all 0.4s;
+}
+
+.recipe {
+    position: absolute;
+    width: 200px;
+    top: 350px;
+    left: 20px;
+
+    ul {
+        margin: 0;
+        padding: 10px 0 10px 0;
+    }
 }
