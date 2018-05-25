@@ -10,6 +10,9 @@ class Header extends Component {
     super(props);
     this.handleLogout = this.handleLogout.bind(this);
     this.toggleMenu = this.toggleMenu.bind(this);
+    this.linkRefs = Array(5)
+      .fill(0)
+      .map(item => React.createRef());
     this.state = {
       menuIsOpen: false
     };
@@ -66,7 +69,14 @@ class Header extends Component {
 
   toggleMenu() {
     const trigger = !this.state.menuIsOpen;
-    return this.setState({ menuIsOpen: trigger });
+    this.setState({ menuIsOpen: trigger });
+    if (trigger) {
+      this.linkRefs.forEach((link, i) => {
+        setTimeout(() => {
+          link.current.classList.add("opaque");
+        }, (i + 1) * 200);
+      });
+    }
   }
 
   render() {
@@ -92,11 +102,11 @@ class Header extends Component {
         )}
         {this.state.menuIsOpen ? (
           <div className="navMenu">
-            <button onClick={this.navTo.bind(this, "/")}>Home</button>
-            <button onClick={this.navTo.bind(this, "/ejuices")}>Recipe Maker</button>
-            <button>Three</button>
-            <button>Four</button>
-            <button>Five</button>
+            <button ref={this.linkRefs[0]} onClick={this.navTo.bind(this, "/")}>Home</button>
+            <button ref={this.linkRefs[1]} onClick={this.navTo.bind(this, "/ejuices")}>Recipe Maker</button>
+            <button ref={this.linkRefs[2]} >Recipe Finder</button>
+            <button ref={this.linkRefs[3]} onClick={this.navTo.bind(this, "/flavors")}>Flavor DB</button>
+            <button ref={this.linkRefs[4]} >Five</button>
           </div>
         ) : null}
       </div>

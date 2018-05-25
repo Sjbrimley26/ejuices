@@ -152,38 +152,58 @@ class EJuices extends Component {
     });
   }
 
-  //TODO FIX Bug that causes vg to overlap pg if you add them 
-  // both at once.
-
   changePG(percentage) {
-    return this.setState({
+    this.setState({
       pgHeight: this.state.pgHeight + 2 * percentage,
-      pgTop: this.state.pgTop - 2 * percentage,
-      flavorTop: this.state.flavorTop + 2 * percentage,
-      vgTop: this.state.vgTop + 2 * percentage
+      pgTop: 200 - 
+        this.state.flavorHeight - 
+        this.state.vgHeight - 
+        (this.state.pgHeight + 2 * percentage),
     });
+
+    // I think that calling setState so close together is causing it not to render
+    // but doing a setTimeout makes it work, it causes a funky bug to appear briefly though
+    setTimeout(() => {
+      if (this.state.pgTop === this.state.vgTop) {
+        this.setState({
+          pgTop: this.state.pgTop - this.state.pgHeight
+        });
+      }
+    }, 100);
   }
 
   changeFlavorAmount(percentage) {
-    return this.setState({
+    this.setState({
       flavorHeight: this.state.flavorHeight + 2 * percentage,
       vgTop: this.state.vgTop - 2 * percentage,
-      flavorTop: this.state.flavorTop - 2 * percentage
+      flavorTop: 200 - (this.state.flavorHeight + 2 * percentage)
     });
+
+    setTimeout(() => {
+      this.setState({
+        pgTop: 200 -
+          this.state.flavorHeight -
+          (this.state.vgHeight) -
+          (this.state.pgHeight)
+      });
+    }, 100);
+
   }
 
   changeVG(percentage) {
-    return this.setState({
+    this.setState({
       vgHeight: this.state.vgHeight + 2 * percentage,
-      vgTop:
-        this.state.flavorTop -
-        (this.state.vgHeight + 2 * percentage)
+      vgTop: 200 - this.state.flavorHeight - (this.state.vgHeight + 2 * percentage)
     });
-  }
 
-  *changePGThenVG(i, t) {
-    yield this.changePG(i);
-    yield this.changeVG(t);
+    setTimeout(() => {
+      this.setState({
+        pgTop: 200 -
+          this.state.flavorHeight -
+          (this.state.vgHeight) -
+          (this.state.pgHeight)
+      });
+    }, 100);
   }
 
   handleSelectedFlavorChange(e) {
@@ -236,37 +256,38 @@ class EJuices extends Component {
 
   addFillers(e) {
     e.stopPropagation();
-    let { bottleFlavors } = this.state;
-    let iter = this.changePGThenVG(this.state.currentPG, this.state.currentVG);
+    let { bottleFlavors, currentVG } = this.state;
 
-    if (this.state.currentPG >= 0) {
-      iter.next();
-      if (bottleFlavors.findIndex(findPG) > -1) {
-        const oldPercentage = bottleFlavors[bottleFlavors.findIndex(findPG)].percentage;
-        bottleFlavors.splice(bottleFlavors.findIndex(findPG), 1, {
-          flavor: "PG",
-          percentage: oldPercentage + this.state.currentPG
-        });
-      } else {
-        bottleFlavors = bottleFlavors.concat({
-          flavor: "PG",
-          percentage: this.state.currentPG
-        });
-      }
-    }
-
-    if (this.state.currentVG >= 0) {
-      iter.next();
+    if (currentVG >= 0) {
+      this.changeVG(currentVG);
       if (bottleFlavors.findIndex(findVG) > -1) {
         const oldPercentage = bottleFlavors[bottleFlavors.findIndex(findVG)].percentage;
         bottleFlavors.splice(bottleFlavors.findIndex(findVG), 1, {
           flavor: "VG",
-          percentage: oldPercentage + this.state.currentVG
+          percentage: oldPercentage + currentVG
         });
       } else {
         bottleFlavors = bottleFlavors.concat({
           flavor: "VG",
-          percentage: this.state.currentVG
+          percentage: currentVG
+        });
+      }
+    }
+
+    let { currentPG } = this.state;
+
+    if (currentPG >= 0) {
+      setTimeout(this.changePG(currentPG), 100);
+      if (bottleFlavors.findIndex(findPG) > -1) {
+        const oldPercentage = bottleFlavors[bottleFlavors.findIndex(findPG)].percentage;
+        bottleFlavors.splice(bottleFlavors.findIndex(findPG), 1, {
+          flavor: "PG",
+          percentage: oldPercentage + currentPG
+        });
+      } else {
+        bottleFlavors = bottleFlavors.concat({
+          flavor: "PG",
+          percentage: currentPG
         });
       }
     }
@@ -290,9 +311,22 @@ class EJuices extends Component {
     }}>
         <div className="halfBox">
           <div className="bottleBlock">
-            <div className="pgFill" style={{ height: this.state.pgHeight, top: this.state.pgTop }} />
-            <div className="flavorFill" style={{ height: this.state.flavorHeight, top: this.state.flavorTop }} />
-            <div className="vgFill" style={{ height: this.state.vgHeight, top: this.state.vgTop }} />
+            <div className="pgFill" style={{ 
+              height: this.state.pgHeight, 
+              top: this.state.pgTop 
+            }} />
+            <div className="flavorFill" 
+              style={{ 
+                height: this.state.flavorHeight, 
+                top: this.state.flavorTop 
+              }} 
+            />
+            <div className="vgFill" 
+              style={{ 
+                height: this.state.vgHeight, 
+                top: this.state.vgTop 
+              }} 
+            />
             <img className="bottlePic" height="200px" width="200px" src={bottlePic} />
           </div>
           <br />

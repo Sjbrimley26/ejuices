@@ -86,18 +86,14 @@ $montserrat: "Montserrat Alternates", sans-serif;
   position: absolute;
   right: 46px;
   top: 80px;
-  height: 300px;
   width: 200px;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  align-content: space-between;
-  background: $background-color;
   z-index: 10;
+
+  
 
   button {
     height: 50px;
-    margin-bottom: 2px;
+    width: 200px;
     background: $background-color;
     color: $font-color;
     font-weight: 600;
@@ -107,6 +103,22 @@ $montserrat: "Montserrat Alternates", sans-serif;
     border-top: 1px hidden;
     border-left: 1px hidden;
     transition: all 0.4s;
+    padding: 2px;
+    opacity: 0;
+    transform-origin: top;
+
+    @for $i from 1 through 5 {
+      &:nth-child(#{$i}) {
+        animation-name: menu;
+        animation-duration: 400ms;
+        animation-delay: (200ms * $i) - 200ms;
+        animation-timing-function: ease-out;
+      }
+    }
+
+    &.opaque {
+      opacity: 1;
+    }
 
     &:hover {
       color: $background-color;
@@ -114,4 +126,25 @@ $montserrat: "Montserrat Alternates", sans-serif;
       font-size: 1.2em;
     }
   }
+}
+
+@keyframes menu {
+  0% {
+    opacity: 0;
+    display: none;
+    transform: translateX(50px) rotateY(50deg) rotateX(75deg);
+  }
+
+  1% {
+    opacity: 0;
+    display: block;
+    transform: translateX(50px) rotateY(50deg) rotateX(75deg);
+  }
+
+  100% {
+    opacity: 1;
+    display: block;
+    transform: translateX(0) rotateY(0deg) rotateX(0deg);
+  }
+
 }
